@@ -1,5 +1,5 @@
 # Fnaf-in-pygame
-This is a fully recreation of Five Nights at Halu 2 by Scott Cawthon.
+This is a fully recreation of Five Nights at Hospital by Scott Cawthon.
 
 
 # Requirements:

@@ -24,7 +24,7 @@ gameplay = (vertex, fragment)
 minigames = (min_vertex, min_fragment)
 
 class App:
-	def __init__(self, initial_dimentions=(1024, 768), caption="Five Nights at Halu 2 python edition"):
+	def __init__(self, initial_dimentions=(1024, 768), caption="Five Nights at Hospital python edition"):
 		self.mobile = os.environ.get("FNAH_MOBILE") == "1" or sys.platform in ("android", "ios")
 		self.playing = True
 		self.loaded = False
@@ -41,7 +41,7 @@ class App:
 
 		# Icon
 		if not self.mobile:
-			icon = pygame.image.load("icon.ico")
+			icon = pygame.image.load("icon.png").convert_alpha()
 			pygame.display.set_icon(icon)
 		else:
 			self._install_mobile_input()
