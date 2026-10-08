@@ -22,7 +22,7 @@ gameplay = (vertex, fragment)
 minigames = (min_vertex, min_fragment)
 
 class App:
-	def __init__(self, initial_dimentions=(1024, 768), caption="Five Nights at Freddy's 2 python edition"):
+	def __init__(self, initial_dimentions=(1024, 768), caption="Five Nights at Halu 2 python edition"):
 		self.playing = True
 		self.loaded = False
 
