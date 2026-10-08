@@ -35,7 +35,8 @@ def save(App):
         json_transform = json.dumps(data, indent=1)
     else:
         json_transform = json.dumps(data)
-    with open("files/utils.txt", "wb") as f:
+    save_path = os.path.join(os.path.dirname(sys.executable), "utils.txt") if getattr(sys, "frozen", False) else "files/utils.txt"
+    with open(save_path, "wb") as f:
         if not App.debug:
             f.write(
                 rsa.encrypt(json_transform.encode(), PUBLIC_KEY)
@@ -81,7 +82,11 @@ def get_decrypted_file(read:bytes):
     return json_raw
 
 def read(App):
-    with open("files/utils.txt", "rb") as f:
+    save_path = os.path.join(os.path.dirname(sys.executable), "utils.txt") if getattr(sys, "frozen", False) else "files/utils.txt"
+    if not os.path.exists(save_path):
+        return default()
+
+    with open(save_path, "rb") as f:
         en = f.read()
 
     if App.debug:
