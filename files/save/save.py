@@ -1,4 +1,6 @@
 import json
+import os
+import sys
 import rsa
 from files.save.key import private_raw
 
@@ -23,7 +25,8 @@ def save(App):
     
 
     # Get key
-    with open("public.pem", "r") as pk:
+    base_path = getattr(sys, "_MEIPASS", os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+    with open(os.path.join(base_path, "public.pem"), "r") as pk:
         raw_public_key = pk.read()
 
     PUBLIC_KEY = rsa.PublicKey.load_pkcs1(raw_public_key)
