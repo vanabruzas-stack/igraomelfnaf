@@ -1,0 +1,33 @@
+name: Prepare iOS build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ios-source-check:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Check mobile Python sources
+        env:
+          FNAH_MOBILE: '1'
+        run: |
+          python -m compileall -q files include main.py
+
+      - name: Archive iOS source bundle
+        run: |
+          mkdir -p ios-source
+          cp -R files include sprites sounds fonts main.py icon.ico public.pem ios-source/
+          tar -czf fnah2-ios-source.tar.gz ios-source
+
+      - name: Upload iOS source bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: fnah2-ios-source
+          path: fnah2-ios-source.tar.gz

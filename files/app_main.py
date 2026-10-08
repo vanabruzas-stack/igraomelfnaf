@@ -1,3 +1,5 @@
+import os
+import sys
 import pygame
 from pygame.locals import QUIT
 
@@ -23,6 +25,7 @@ minigames = (min_vertex, min_fragment)
 
 class App:
 	def __init__(self, initial_dimentions=(1024, 768), caption="Five Nights at Halu 2 python edition"):
+		self.mobile = os.environ.get("FNAH_MOBILE") == "1" or sys.platform in ("android", "ios")
 		self.playing = True
 		self.loaded = False
 
@@ -30,12 +33,18 @@ class App:
 		pygame.init() # Starts the pygame timer
 		pygame.mixer.init() # Init the mixer
 		self.dimentions = initial_dimentions
-		self.surface = pygame.display.set_mode( self.dimentions, vsync=True, flags= pygame.OPENGL | pygame.DOUBLEBUF | pygame.RESIZABLE )
+		if self.mobile:
+			self.surface = pygame.display.set_mode(self.dimentions, pygame.SCALED | pygame.FULLSCREEN)
+		else:
+			self.surface = pygame.display.set_mode(self.dimentions, vsync=True, flags=pygame.OPENGL | pygame.DOUBLEBUF | pygame.RESIZABLE)
 		pygame.display.set_caption(caption) # Win's name
 
 		# Icon
-		icon = pygame.image.load("icon.ico")
-		pygame.display.set_icon(icon)
+		if not self.mobile:
+			icon = pygame.image.load("icon.ico")
+			pygame.display.set_icon(icon)
+		else:
+			self._install_mobile_input()
 
 		# Shaders
 		self.set_shaders()
@@ -90,13 +99,41 @@ class App:
 	def get_deltatime(self):
 		self.deltaTime = self.clock.tick(self.frames_per_second) / 10.3
 
+	def _install_mobile_input(self):
+		self._touch_position = (self.dimentions[0] / 2, self.dimentions[1] / 2)
+		self._touch_pressed = False
+		self._mouse_get_pos = pygame.mouse.get_pos
+		self._mouse_get_pressed = pygame.mouse.get_pressed
+
+		def get_pos():
+			return self._touch_position if self._touch_pressed else self._mouse_get_pos()
+
+		def get_pressed():
+			return (1, 0, 0) if self._touch_pressed else self._mouse_get_pressed()
+
+		pygame.mouse.get_pos = get_pos
+		pygame.mouse.get_pressed = get_pressed
+
+	def _handle_touch(self, events):
+		for event in events:
+			if event.type in (pygame.FINGERDOWN, pygame.FINGERMOTION):
+				self._touch_position = (
+					event.x * self.dimentions[0],
+					event.y * self.dimentions[1]
+				)
+				self._touch_pressed = True
+			elif event.type == pygame.FINGERUP:
+				self._touch_pressed = False
+
 	def loop(self):
 		while self.playing == True:
 			
 			events = pygame.event.get()
+			if self.mobile:
+				self._handle_touch(events)
 
 			# Update mouse's hitbox and pressed buttons
-			diff = get_shader_diff(self.surface)
+			diff = (0, 0) if self.mobile else get_shader_diff(self.surface)
 			p = pygame.mouse.get_pos()
 			self.mouse_hitbox.left, self.mouse_hitbox.top = p
 			self.mouse_hitbox.x -= p[0]*diff[0]
