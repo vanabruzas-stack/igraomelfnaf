@@ -38,17 +38,29 @@ jobs:
 
     - name: Build with Buildozer
       run: |
+        set -o pipefail
         buildozer -v android debug 2>&1 | tee android-build.log
 
-    - name: Upload build log on failure
-      if: failure()
+    - name: Collect Android packages
+      if: success()
+      run: |
+        mkdir -p release
+        find . -type f \( -name '*.apk' -o -name '*.aab' \) -print
+        find . -type f \( -name '*.apk' -o -name '*.aab' \) -exec cp {} release/ \;
+        test -n "$(find release -type f \( -name '*.apk' -o -name '*.aab' \) -print -quit)"
+
+    - name: Upload build log
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: android-build-log
         path: android-build.log
+        if-no-files-found: warn
 
-    - name: Upload APK artifact
+    - name: Upload Android package
+      if: success()
       uses: actions/upload-artifact@v4
       with:
-        name: game-apk
-        path: bin/*.apk
+        name: game-android-package
+        path: release/*
+        if-no-files-found: error
